@@ -1,33 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button } from 'react-native';
-import { auth, db } from '../firebaseConfig';
+import React, { useEffect, useState } from "react";
+import { View, FlatList, StyleSheet } from "react-native";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+import EventListCard from "../components/EventListCard";
 
-const EventListScreen = ({ navigation }) => {
+const EventListScreen = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = db.collection('events').onSnapshot(snapshot => {
-      setEvents(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
-    return unsubscribe;
+    const unsubscribe = onSnapshot(
+      collection(db, "events"),
+      (snapshot) => {
+        const eventList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setEvents(eventList);
+      },
+      (error) => {
+        console.error("Error fetching events: ", error);
+      }
+    );
+    return () => unsubscribe();
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         data={events}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View>
-            <Text>{item.title}</Text>
-            <Text>{item.description}</Text>
-            <Button title="Add to Favourites" onPress={() => {}} />
-          </View>
-        )}
+        renderItem={({ item }) => <EventListCard event={item} />}
       />
-      <Button title="Log Out" onPress={() => auth.signOut()} />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+});
 
 export default EventListScreen;

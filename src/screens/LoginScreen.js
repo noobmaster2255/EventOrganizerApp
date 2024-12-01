@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
-import { auth } from "../firebaseConfig";
+import { View, StyleSheet, Button, Alert, Text, TouchableOpacity } from "react-native";
+import InputField from "../components/InputField";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -8,39 +10,76 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      await auth.signInWithEmailAndPassword(email, password);
-      navigation.replace("Main");
+      await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert("Login Successful", "Welcome!");
     } catch (error) {
-      alert(error.message);
+      Alert.alert("Login Failed", error.message);
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      <TextInput
-        placeholder="Email"
+      <InputField
+        label="Email"
         value={email}
         onChangeText={setEmail}
+        placeholder="Enter your email"
         style={styles.input}
       />
-      <TextInput
-        placeholder="Password"
+      <InputField
+        label="Password"
         value={password}
         onChangeText={setPassword}
+        placeholder="Enter your password"
         secureTextEntry
         style={styles.input}
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Sign Up" onPress={() => navigation.navigate("Signup")} />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+        <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 5 },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#f9f9f9",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
+    textAlign: "center",
+  },
+  input: {
+    marginBottom: 15,
+  },
+  button: {
+    backgroundColor: "#4CAF50",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  signupText: {
+    color: "#007BFF",
+    textAlign: "center",
+    marginTop: 10,
+    fontSize: 16,
+  },
 });
 
 export default LoginScreen;
