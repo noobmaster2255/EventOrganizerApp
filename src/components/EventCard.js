@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
 import { db, auth } from "../../firebaseConfig";
-import { doc, deleteDoc } from "firebase/firestore";
+import { doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 const EventCard = ({ event, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -15,21 +15,25 @@ const EventCard = ({ event, onDelete }) => {
     if (user && user.uid === event.creator) {
       try {
         const eventRef = doc(db, "events", event.id);
+        console.log("Updating Event:", eventRef);
         await updateDoc(eventRef, {
           title: newTitle,
           description: newDescription,
           date: newDate,
           location: newLocation,
         });
+        console.log("Update successful");
         Alert.alert("Event Updated Successfully");
         setIsEditing(false);
       } catch (error) {
+        console.error("Update Error:", error.message);
         Alert.alert("Error", error.message);
       }
     } else {
       Alert.alert("You can only edit your own events.");
     }
   };
+  
 
   const handleDeleteEvent = async () => {
     const user = auth.currentUser;
